@@ -1,5 +1,3 @@
-# Deployment Guide
-
 ## Local Deployment with Docker
 
 This project is configured for local deployment using Docker and Docker Compose.
@@ -194,11 +192,15 @@ docker-compose up backend
 
 
 ### Screenshots
-
-[Add screenshots of:]
 1. Streamlit frontend with prediction
+<img width="1512" height="982" alt="Screenshot 2025-11-30 at 2 22 24 AM" src="https://github.com/user-attachments/assets/6aa6ea80-bec4-4b95-8f49-100fde3371f2" />
+<img width="1512" height="982" alt="Screenshot 2025-11-30 at 2 22 35 AM" src="https://github.com/user-attachments/assets/f0b0421f-57a8-414c-bc7d-c586b41d4d14" />
+
 2. W&B dashboard with metrics
-3. API documentation (FastAPI /docs)
+<img width="800" height="600" alt="confusion_matrix" src="https://github.com/user-attachments/assets/7287a815-5407-45a3-9d7d-ddc17d17ddd4" />
+<img width="1000" height="800" alt="feature_importance" src="https://github.com/user-attachments/assets/0e1085b5-5bdd-4296-bf1c-509bff8f251d" />
+<img width="1512" height="982" alt="metrices1" src="https://github.com/user-attachments/assets/b7d70090-0e30-4417-9874-58f2a825f6d5" />
+<img width="1512" height="982" alt="metrices2" src="https://github.com/user-attachments/assets/f32f3081-a768-4f80-912f-2af4ad15b9c5" />
 
 ---
 
