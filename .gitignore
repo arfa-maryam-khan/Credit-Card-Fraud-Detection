@@ -76,4 +76,5 @@ feature_importance.png
 .secrets/
 secrets.yaml
 *.key
-*.pem
+*.pemdata/creditcard.csv
+data/*.csv
