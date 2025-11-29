@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8080:8080"
+    environment:
+      - WANDB_API_KEY=${WANDB_API_KEY}
+    volumes:
+      - ./models/artifacts:/app/models/artifacts
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "8501:8501"
+    environment:
+      - API_URL=http://backend:8080
+    depends_on:
+      - backend

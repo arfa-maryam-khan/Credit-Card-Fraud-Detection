@@ -1,0 +1,81 @@
+name: Model Training Pipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'models/**'
+      - 'data/**'
+  workflow_dispatch:
+    inputs:
+      run_name:
+        description: 'Custom run name'
+        required: false
+        default: ''
+
+env:
+  PYTHON_VERSION: '3.9'
+
+jobs:
+  train:
+    name: Train Model
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Cache pip packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Download dataset
+        run: |
+          # If you're storing dataset in GitHub releases or elsewhere
+          # Add download logic here, or use W&B artifacts
+          echo "Dataset should be available in data/ directory"
+      
+      - name: Run training
+        env:
+          WANDB_API_KEY: ${{ secrets.WANDB_API_KEY }}
+        run: |
+          python models/train.py \
+            --data_path data/creditcard.csv \
+            --project_name fraud-detection-mlops \
+            --run_name "${{ github.event.inputs.run_name || github.sha }}"
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: model-artifacts
+          path: models/artifacts/
+          retention-days: 30
+      
+      - name: Check model performance
+        id: check_performance
+        run: |
+          # This would parse metrics and decide if model is good enough
+          echo "model_passed=true" >> $GITHUB_OUTPUT
+      
+      - name: Trigger deployment
+        if: steps.check_performance.outputs.model_passed == 'true'
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: model-updated
+          client-payload: '{"sha": "${{ github.sha }}", "run_id": "${{ github.run_id }}"}'
