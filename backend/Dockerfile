@@ -2,11 +2,17 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
-COPY requirements.txt .
+# Copy requirements from backend directory
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+# Copy backend code
+COPY backend/ .
 
+# Copy model artifacts
+COPY models/artifacts/ ./models/artifacts/
+
+# Environment variables
 ENV PYTHONUNBUFFERED=1
 ENV PORT=8080
 

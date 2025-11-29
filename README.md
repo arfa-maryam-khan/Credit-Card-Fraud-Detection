@@ -1,389 +1,245 @@
-# Credit Card Fraud Detection - MLOps Pipeline
+# Deployment Guide
 
-![Python](https://img.shields.io/badge/python-3.9-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
-![Status](https://img.shields.io/badge/status-active-success.svg)
+## Local Deployment with Docker
 
-A complete end-to-end MLOps pipeline for credit card fraud detection, demonstrating reproducible ML workflows, automated training, model registry, and production deployment.
+This project is configured for local deployment using Docker and Docker Compose.
 
-## 🎯 Project Overview
-
-This project implements a production-grade machine learning system for detecting fraudulent credit card transactions. It showcases:
-
-- ✅ Automated training pipeline with experiment tracking
-- ✅ Model versioning and registry (Weights & Biases)
-- ✅ CI/CD automation (GitHub Actions)
-- ✅ Containerized microservices (Docker)
-- ✅ Production deployment (Google Cloud Run)
-- ✅ RESTful API for inference (FastAPI)
-- ✅ Interactive web interface (Streamlit)
-
-## 🏗️ Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                   GitHub Repository                          │
-│  - Training Code    - Backend API    - Frontend UI          │
-└──────────────────────┬──────────────────────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────────────────────┐
-│               GitHub Actions (CI/CD)                         │
-│  - Model Training   - Testing   - Deployment                │
-└──────────┬───────────────────────┬──────────────────────────┘
-           │                       │
-           ▼                       ▼
-┌──────────────────────┐   ┌─────────────────────────────────┐
-│  Weights & Biases    │   │    Google Cloud Run             │
-│  - Experiments       │   │  ┌──────────────────────────┐   │
-│  - Model Registry    │   │  │  FastAPI Backend         │   │
-│  - Artifacts         │   │  │  (Model Inference)       │   │
-└──────────────────────┘   │  └──────────┬───────────────┘   │
-                           │             │                   │
-                           │  ┌──────────▼───────────────┐   │
-                           │  │  Streamlit Frontend      │   │
-                           │  │  (User Interface)        │   │
-                           │  └──────────────────────────┘   │
-                           └─────────────────────────────────┘
-```
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Python 3.9+
-- Docker & Docker Compose
-- Weights & Biases account
-- Google Cloud Platform account (for deployment)
-
-### 1. Clone Repository
-
+### Quick Start
 ```bash
-git clone https://github.com/yourusername/fraud-detection-mlops.git
-cd fraud-detection-mlops
-```
+# Set environment variable
+export WANDB_API_KEY="your_wandb_api_key"
 
-### 2. Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 3. Download Dataset
-
-Download the [Credit Card Fraud Detection dataset](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud) from Kaggle and place `creditcard.csv` in the `data/` directory.
-
-### 4. Set Up Weights & Biases
-
-```bash
-# Login to W&B
-wandb login
-
-# Set API key as environment variable
-export WANDB_API_KEY=your_api_key_here
-```
-
-### 5. Train Model
-
-```bash
-python models/train.py --data_path data/creditcard.csv
-```
-
-### 6. Run Locally with Docker Compose
-
-```bash
-# Build and start services
+# Run both services
 docker-compose up --build
 
-# Access services:
+# Access the application:
+# - Frontend: http://localhost:8501
 # - Backend API: http://localhost:8080
-# - Frontend UI: http://localhost:8501
+# - API Docs: http://localhost:8080/docs
 ```
-
-## 📊 Model Details
-
-### Algorithm
-- **Model Type:** LightGBM (Gradient Boosting)
-- **Framework:** scikit-learn + LightGBM
-- **Training Time:** ~2-3 minutes on CPU
-
-### Features
-- **Input Features:** 30 (Time, V1-V28, Amount)
-- **Target:** Binary (0 = Legitimate, 1 = Fraud)
-- **Class Imbalance:** Handled via `scale_pos_weight` parameter
-
-### Performance Metrics
-
-| Metric | Value |
-|--------|-------|
-| Precision | 95% |
-| Recall | 88% |
-| F1-Score | 91% |
-| ROC-AUC | 98% |
-
-*Note: Metrics from baseline model. Actual values will vary.*
-
-## 🔄 MLOps Pipeline
-
-### 1. Training Pipeline
-
-**Trigger:** Push to `main` branch or manual dispatch
-
-**Steps:**
-1. Load and validate data
-2. Preprocess features (scaling)
-3. Train LightGBM model
-4. Evaluate performance
-5. Log metrics to W&B
-6. Save model to W&B registry
-7. Trigger deployment if metrics pass threshold
-
-### 2. Model Registry
-
-**Platform:** Weights & Biases
-
-**Versioning Strategy:**
-- Each training run creates a new model version
-- Models are tagged with aliases: `latest`, `production`, `staging`
-- Metadata includes metrics, hyperparameters, and training date
-
-### 3. Deployment Pipeline
-
-**Backend Deployment:**
-- Containerized FastAPI application
-- Automatically pulls latest `production` model from W&B
-- Deployed to Google Cloud Run
-- Auto-scaling based on traffic
-
-**Frontend Deployment:**
-- Streamlit web application
-- Connects to backend via REST API
-- Deployed to Google Cloud Run
-
-## 🛠️ Technology Stack
-
-### Machine Learning
-- **Framework:** scikit-learn, LightGBM
-- **Experiment Tracking:** Weights & Biases
-- **Model Registry:** W&B Artifacts
-
-### Backend
-- **API Framework:** FastAPI
-- **Server:** Uvicorn
-- **Validation:** Pydantic
-
-### Frontend
-- **Framework:** Streamlit
-- **Visualization:** Plotly
-- **HTTP Client:** Requests
-
-### DevOps
-- **CI/CD:** GitHub Actions
-- **Containerization:** Docker
-- **Deployment:** Google Cloud Run
-- **Version Control:** Git/GitHub
-
-## 📁 Project Structure
-
-```
-fraud-detection-mlops/
-├── .github/
-│   └── workflows/
-│       ├── train-pipeline.yml      # Training automation
-│       ├── deploy-backend.yml      # Backend deployment
-│       └── deploy-frontend.yml     # Frontend deployment
-├── backend/
-│   ├── main.py                     # FastAPI application
-│   ├── requirements.txt
-│   └── Dockerfile
-├── frontend/
-│   ├── app.py                      # Streamlit application
-│   ├── requirements.txt
-│   └── Dockerfile
-├── models/
-│   ├── train.py                    # Training script
-│   ├── config.yaml                 # Model configuration
-│   └── artifacts/                  # Saved models (local)
-├── data/
-│   └── creditcard.csv             # Dataset (not in repo)
-├── tests/
-│   ├── test_model.py
-│   └── test_api.py
-├── docker-compose.yml              # Local development
-├── requirements.txt                # Python dependencies
-└── README.md
-```
-
-## 🔌 API Endpoints
-
-### Health Check
-```bash
-GET /health
-```
-
-### Model Information
-```bash
-GET /model-info
-```
-
-### Single Prediction
-```bash
-POST /predict
-Content-Type: application/json
-
-{
-  "Time": 0.0,
-  "V1": -1.359807,
-  "V2": -0.072781,
-  ...
-  "V28": -0.021053,
-  "Amount": 149.62
-}
-```
-
-### Batch Prediction
-```bash
-POST /batch-predict
-Content-Type: application/json
-
-{
-  "transactions": [...]
-}
-```
-
-## 🧪 Testing
-
-```bash
-# Run unit tests
-pytest tests/
-
-# Test API locally
-curl http://localhost:8080/health
-
-# Test prediction
-curl -X POST http://localhost:8080/predict \
-  -H "Content-Type: application/json" \
-  -d @sample_transaction.json
-```
-
-## 🚀 Deployment
-
-### Deploy to Google Cloud Run
-
-1. **Set up GCP credentials:**
-```bash
-# Create service account and download key
-gcloud iam service-accounts create fraud-detection-sa
-gcloud projects add-iam-policy-binding YOUR_PROJECT_ID \
-  --member="serviceAccount:fraud-detection-sa@YOUR_PROJECT_ID.iam.gserviceaccount.com" \
-  --role="roles/run.admin"
-```
-
-2. **Add GitHub Secrets:**
-- `GCP_PROJECT_ID`: Your GCP project ID
-- `GCP_SA_KEY`: Service account JSON key
-- `WANDB_API_KEY`: Your W&B API key
-
-3. **Push to main branch:**
-```bash
-git push origin main
-```
-
-GitHub Actions will automatically:
-- Train the model
-- Deploy backend to Cloud Run
-- Deploy frontend to Cloud Run
-
-## 📈 Monitoring
-
-- **Experiment Tracking:** View training runs at https://wandb.ai/your-username/fraud-detection-mlops
-- **Model Registry:** Browse model versions in W&B
-- **Deployment Logs:** Check Cloud Run logs in GCP Console
-- **Application Metrics:** Monitor request latency, error rates in Cloud Run
-
-## 🔐 Security Considerations
-
-- API keys stored as GitHub Secrets
-- Model artifacts stored in W&B (not in repo)
-- Cloud Run services use managed identities
-- Input validation via Pydantic schemas
-- Rate limiting (can be added via Cloud Run)
-
-## 🎓 Learning Outcomes
-
-This project demonstrates:
-
-1. **Version Control:** Git for code, W&B for data/models
-2. **Experiment Tracking:** Systematic logging of metrics and hyperparameters
-3. **CI/CD:** Automated testing, training, and deployment
-4. **Model Registry:** Centralized model versioning and governance
-5. **Containerization:** Reproducible environments via Docker
-6. **Microservices:** Separation of concerns (backend/frontend)
-7. **Cloud Deployment:** Scalable serverless deployment
-8. **Monitoring:** Observability into model performance
-
-## 📝 Design Decisions
-
-### Why LightGBM?
-- Fast training on CPU
-- Handles imbalanced data well via `scale_pos_weight`
-- Excellent performance on tabular data
-- Built-in feature importance
-
-### Why Weights & Biases?
-- Integrated experiment tracking + model registry
-- Easy artifact management
-- Great visualization capabilities
-- Simple API for logging
-
-### Why FastAPI?
-- Modern, fast framework
-- Automatic API documentation
-- Async support for better performance
-- Built-in validation via Pydantic
-
-### Why Google Cloud Run?
-- Serverless (no infrastructure management)
-- Auto-scaling based on traffic
-- Cost-effective (pay-per-use)
-- Easy CI/CD integration
-
-## 🐛 Troubleshooting
-
-### Issue: Model not loading in backend
-**Solution:** Ensure `WANDB_API_KEY` is set and model exists in W&B registry
-
-### Issue: Frontend can't connect to backend
-**Solution:** Check `API_URL` environment variable in frontend
-
-### Issue: Training fails with memory error
-**Solution:** Reduce dataset size or use cloud compute with more RAM
-
-## 🤝 Contributing
-
-Contributions are welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see LICENSE file for details.
-
-## 👏 Acknowledgments
-
-- Dataset: [Credit Card Fraud Detection](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud)
-- MLOps Inspiration: Chip Huyen's "Designing Machine Learning Systems"
-- Tools: Weights & Biases, FastAPI, Streamlit, Google Cloud
-
-## 📧 Contact
-
-For questions or feedback:
-- GitHub Issues: [Create an issue](https://github.com/yourusername/fraud-detection-mlops/issues)
-- Email: your.email@example.com
 
 ---
 
-**Built with ❤️ as part of AI/ML Bootcamp Final Project**
+## Architecture
+```
+┌─────────────────────────────────────────┐
+│        Docker Compose Network           │
+│                                          │
+│  ┌────────────────────────────────┐    │
+│  │  Frontend (Streamlit)          │    │
+│  │  Port: 8501                    │    │
+│  │  Image: fraud-frontend         │    │
+│  └────────┬───────────────────────┘    │
+│           │ HTTP Requests               │
+│           ▼                              │
+│  ┌────────────────────────────────┐    │
+│  │  Backend (FastAPI)             │    │
+│  │  Port: 8080                    │    │
+│  │  Image: fraud-backend          │    │
+│  │  Loads: model.pkl, scaler.pkl  │    │
+│  └────────────────────────────────┘    │
+└─────────────────────────────────────────┘
+```
+
+---
+
+## Prerequisites
+
+- Docker installed ([Install Docker](https://docs.docker.com/get-docker/))
+- Docker Compose installed (included with Docker Desktop)
+- Git (to clone the repository)
+- Weights & Biases API key ([Get key](https://wandb.ai/authorize))
+
+---
+
+## Step-by-Step Setup
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/YOUR_USERNAME/Credit-Card-Fraud-Detection.git
+cd Credit-Card-Fraud-Detection
+```
+
+### 2. Set Environment Variables
+```bash
+# Export W&B API key
+export WANDB_API_KEY="your_wandb_api_key_here"
+
+# Verify it's set
+echo $WANDB_API_KEY
+```
+
+### 3. Build and Run
+```bash
+# Build images and start services
+docker-compose up --build
+
+# Or run in detached mode (background)
+docker-compose up -d --build
+```
+
+### 4. Access the Application
+
+Open your browser and navigate to:
+
+- **Frontend:** http://localhost:8501
+- **Backend API:** http://localhost:8080
+- **API Documentation:** http://localhost:8080/docs
+
+### 5. Stop the Services
+```bash
+# Stop services (Ctrl+C if running in foreground)
+
+# Or if running in detached mode:
+docker-compose down
+```
+
+---
+
+## Docker Images
+
+This project uses two Docker images:
+
+### Backend Image
+- **Base:** Python 3.9-slim
+- **Contains:** FastAPI app, model artifacts
+- **Port:** 8080
+- **Health check:** `GET /health`
+
+### Frontend Image
+- **Base:** Python 3.9-slim
+- **Contains:** Streamlit app
+- **Port:** 8501
+- **Connects to:** Backend at `http://backend:8080`
+
+---
+
+## Environment Variables
+
+### Backend
+- `WANDB_API_KEY`: Required for W&B integration (optional if using local model files)
+- `PORT`: Default 8080
+
+### Frontend
+- `API_URL`: Backend URL (default: `http://backend:8080` in Docker Compose)
+- `PORT`: Default 8501
+
+---
+
+## Testing the Deployment
+
+### 1. Test Backend Health
+```bash
+curl http://localhost:8080/health
+```
+
+Expected response:
+```json
+{"status":"healthy","model_loaded":true}
+```
+
+### 2. Test Prediction Endpoint
+```bash
+curl -X POST http://localhost:8080/predict \
+  -H "Content-Type: application/json" \
+  -d '{
+    "Time": 0, "V1": -1.36, "V2": -0.07, "V3": 2.54, "V4": 1.38,
+    "V5": -0.34, "V6": 0.46, "V7": 0.24, "V8": 0.10, "V9": 0.36,
+    "V10": 0.09, "V11": -0.55, "V12": -0.62, "V13": -0.99, "V14": -0.31,
+    "V15": 1.47, "V16": -0.47, "V17": 0.21, "V18": 0.03, "V19": 0.40,
+    "V20": 0.25, "V21": -0.02, "V22": 0.28, "V23": -0.11, "V24": 0.07,
+    "V25": 0.13, "V26": -0.19, "V27": 0.13, "V28": -0.02, "Amount": 149.62
+  }'
+```
+
+### 3. Test Frontend
+
+1. Open http://localhost:8501 in browser
+2. Enter transaction details
+3. Click "Check for Fraud"
+4. Verify prediction appears
+
+---
+
+## Viewing Logs
+```bash
+# View all logs
+docker-compose logs
+
+# View specific service logs
+docker-compose logs backend
+docker-compose logs frontend
+
+# Follow logs in real-time
+docker-compose logs -f
+
+# Last 50 lines
+docker-compose logs --tail=50
+```
+
+---
+
+## Rebuilding After Changes
+```bash
+# After changing code
+docker-compose down
+docker-compose up --build
+
+# Quick rebuild of specific service
+docker-compose build backend
+docker-compose up backend
+```
+
+---
+
+
+### Screenshots
+
+[Add screenshots of:]
+1. Streamlit frontend with prediction
+2. W&B dashboard with metrics
+3. API documentation (FastAPI /docs)
+
+---
+
+## Production Deployment (Future)
+
+This Docker setup is cloud-ready and can be deployed to:
+
+- **Render:** Free tier, Docker support
+- **Railway:** Simple Docker deployment
+
+**Infrastructure is prepared but not currently deployed due to time constraints.**
+
+---
+
+## CI/CD (Configured)
+
+GitHub Actions workflows are configured but not triggered:
+
+- **train-pipeline.yml:** Automated model training
+- **deploy.yml:** Whole App deployment 
+
+---
+
+## Additional Resources
+
+- **Docker Documentation:** https://docs.docker.com
+- **Docker Compose Reference:** https://docs.docker.com/compose
+- **FastAPI Documentation:** https://fastapi.tiangolo.com
+- **Streamlit Documentation:** https://docs.streamlit.io
+- **W&B Documentation:** https://docs.wandb.ai
+
+---
+
+## Support
+
+For issues or questions:
+1. Check troubleshooting section above
+2. Review Docker logs: `docker-compose logs`
+3. Verify all prerequisites are installed
+4. Check GitHub Issues in repository
+
+---
+
+**Built for DS & AI Bootcamp Project**

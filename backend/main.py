@@ -18,13 +18,13 @@ threshold = None
 async def load_model():
     global model, scaler, threshold
     
-    with open('../models/artifacts/model.pkl', 'rb') as f:
+    with open('models/artifacts/model.pkl', 'rb') as f:
         model = pickle.load(f)
     
-    with open('../models/artifacts/scaler.pkl', 'rb') as f:
+    with open('models/artifacts/scaler.pkl', 'rb') as f:
         scaler = pickle.load(f)
     
-    with open('../models/artifacts/threshold.pkl', 'rb') as f:
+    with open('models/artifacts/threshold.pkl', 'rb') as f:
         threshold = pickle.load(f)
     
     print(f"✅ Model loaded! Threshold: {threshold:.4f}")
